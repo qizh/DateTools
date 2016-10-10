@@ -9,11 +9,13 @@
 import Foundation
 
 /**
-    # TimePeriodCollection
-    
-     Time period collections serve as loose sets of time periods. They are unorganized unless you decide to sort them, and have their own characteristics like a StartDate and EndDate that are extrapolated from the time periods within. Time period collections allow overlaps within their set of time periods.
- 
-    [Visit our github page](https://github.com/MatthewYork/DateTools#time-period-collections) for more information.
+ *  # TimePeriodCollection
+ *  Time period collections serve as loose sets of time periods. They are
+ *  unorganized unless you decide to sort them, and have their own characteristics
+ *  like a `beginning` and `end` that are extrapolated from the time periods within. Time
+ *  period collections allow overlaps within their set of time periods.
+ *
+ *  [Visit our github page](https://github.com/MatthewYork/DateTools#time-period-collections) for more information.
  */
 open class TimePeriodCollection: TimePeriodGroup {
     
@@ -22,6 +24,13 @@ open class TimePeriodCollection: TimePeriodGroup {
     func append(_ period: TimePeriodProtocol) {
         periods.append(period)
         updateExtremes(period: period)
+    }
+    
+    func append(_ periodArray: [TimePeriodProtocol]) {
+        for period in periodArray {
+            periods.append(period)
+            updateExtremes(period: period)
+        }
     }
     
     func append<C: TimePeriodGroup>(contentsOf newPeriods: C) {
@@ -82,31 +91,33 @@ open class TimePeriodCollection: TimePeriodGroup {
     
     // Potentially use .reduce() instead of these functions
     /**
-        Returns from the ```TimePeriodCollection``` a sub-collection of ```TimePeriod```s whose start and end dates fall completely inside the interval of the given ```TimePeriod```
+     *  Returns from the `TimePeriodCollection` a sub-collection of `TimePeriod`s
+     *  whose start and end dates fall completely inside the interval of the given `TimePeriod`
      */
     func allInside(in period: TimePeriodProtocol) -> TimePeriodCollection {
         let collection = TimePeriodCollection()
         //Filter by periop
         collection.periods = self.periods.filter({ (timePeriod: TimePeriodProtocol) -> Bool in
-            return timePeriod.inside(of: period)
+            return timePeriod.isInside(of: period)
         })
         return collection
     }
     
     /**
-        Returns from the ```TimePeriodCollection``` a sub-collection of ```TimePeriod```s containing the given date
+     *  Returns from the ```TimePeriodCollection``` a sub-collection of ```TimePeriod```s containing the given date
      */
     func periodsIntersected(by date: Date) -> TimePeriodCollection {
         let collection = TimePeriodCollection()
         //Filter by periop
         collection.periods = self.periods.filter({ (timePeriod: TimePeriodProtocol) -> Bool in
-            return timePeriod.contains(date: date, interval: .closed)
+            return timePeriod.contains(date, interval: .closed)
         })
         return collection
     }
     
     /**
-     Returns from the ```TimePeriodCollection``` a sub-collection of ```TimePeriod```s containing either the start date or the end date--or both--of the given ```TimePeriod```
+     *  Returns from the `TimePeriodCollection` a sub-collection of `TimePeriod`s containing either 
+     *  the start date or the end date--or both--of the given `TimePeriod`
      */
     func periodsIntersected(by period: TimePeriodProtocol) -> TimePeriodCollection {
         let collection = TimePeriodCollection()
@@ -117,7 +128,7 @@ open class TimePeriodCollection: TimePeriodGroup {
         return collection
     }
     
-    // MARK: - Map, Filter, Reduce
+    // MARK: - Map
     
     func map(_ transform: (TimePeriodProtocol) throws -> TimePeriodProtocol) rethrows -> TimePeriodCollection {
         var mappedArray = [TimePeriodProtocol]()
@@ -133,23 +144,28 @@ open class TimePeriodCollection: TimePeriodGroup {
     // MARK: - Operator Overloads
     
     static func ==(left: TimePeriodCollection, right: TimePeriodCollection) -> Bool {
-        return left.equals(group: right)
+        return left.equals(right)
     }
     
     //MARK: - Helpers
     
     internal func updateExtremes(period: TimePeriodProtocol) {
         //Check incoming period against previous beginning and end date
-        _beginning = nilOrEarlier(date1: _beginning, date2: period.beginning)
-        _end = nilOrLater(date1: _end, date2: period.end)
+        if self.count == 1 {
+            _beginning = period.beginning
+            _end = period.end
+        } else {
+            _beginning = nilOrEarlier(date1: _beginning, date2: period.beginning)
+            _end = nilOrLater(date1: _end, date2: period.end)
+        }
+        
     }
     
     internal func updateExtremes() {
         if periods.count == 0 {
             _beginning = nil
             _end = nil
-        }
-        else {
+        } else {
             _beginning = periods[0].beginning
             _end = periods[0].end
             for i in 1..<periods.count {
@@ -162,8 +178,7 @@ open class TimePeriodCollection: TimePeriodGroup {
     internal func nilOrEarlier(date1: Date?, date2: Date?) -> Date? {
         if date1 == nil || date2 == nil {
             return nil
-        }
-        else {
+        } else {
             return date1!.earlierDate(date2!)
         }
     }
@@ -171,8 +186,7 @@ open class TimePeriodCollection: TimePeriodGroup {
     internal func nilOrLater(date1: Date?, date2: Date?) -> Date? {
         if date1 == nil || date2 == nil {
             return nil
-        }
-        else {
+        } else {
             return date1!.laterDate(date2!)
         }
     }

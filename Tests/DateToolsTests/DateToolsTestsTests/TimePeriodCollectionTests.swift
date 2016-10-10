@@ -9,7 +9,6 @@
 import XCTest
 @testable import DateToolsTests
 
-
 class TimePeriodCollectionTests : XCTestCase {
     
     var formatter = DateFormatter()
@@ -18,11 +17,12 @@ class TimePeriodCollectionTests : XCTestCase {
     override func setUp() {
         //Initialize formatter
         self.formatter.dateFormat = "yyyy MM dd HH:mm:ss.SSS"
+        self.formatter.timeZone = TimeZone(abbreviation: "UTC")
         //Create test TimePeriods that are 1 year long
-        let firstPeriod = TimePeriod(beginning: self.formatter.date(from: "2015 4 05 18:15:12.000")!, end: self.formatter.date(from: "2017 4 05 18:15:12.000")!)
-        let secondPeriod = TimePeriod(beginning: self.formatter.date(from: "2014 11 05 18:15:12.000")!, end: self.formatter.date(from: "2015 11 05 18:15:12.000")!)
-        let thirdPeriod = TimePeriod(beginning: self.formatter.date(from: "2015 11 05 18:15:12.000")!, end: self.formatter.date(from: "2016 11 05 18:15:12.000")!)
-        let fourthPeriod = TimePeriod(beginning: self.formatter.date(from: "2016 11 05 18:15:12.000")!, end: self.formatter.date(from: "2017 11 05 18:15:12.000")!)
+        let firstPeriod = TimePeriod(beginning: self.formatter.date(from: "2014 11 05 18:15:12.000")!, end: self.formatter.date(from: "2015 11 05 18:15:12.000")!)
+        let secondPeriod = TimePeriod(beginning: self.formatter.date(from: "2015 11 05 18:15:12.000")!, end: self.formatter.date(from: "2016 11 05 18:15:12.000")!)
+        let thirdPeriod = TimePeriod(beginning: self.formatter.date(from: "2016 11 05 18:15:12.000")!, end: self.formatter.date(from: "2017 11 05 18:15:12.000")!)
+        let fourthPeriod = TimePeriod(beginning: self.formatter.date(from: "2015 4 05 18:15:12.000")!, end: self.formatter.date(from: "2017 4 05 18:15:12.000")!)
         
         //Add test periods
         self.controlCollection.append(firstPeriod)
@@ -35,8 +35,34 @@ class TimePeriodCollectionTests : XCTestCase {
         super.tearDown()
     }
     
-    
     // MARK: - Collection Manipulation
+    
+    func testAppendPeriod() {
+        let testPeriod = TimePeriod(beginning: self.formatter.date(from: "2014 11 05 18:15:12.000")!, end: self.formatter.date(from: "2015 11 05 18:15:12.000")!)
+        controlCollection.append(testPeriod)
+        XCTAssertTrue(controlCollection[4] as! TimePeriod == testPeriod)
+    }
+    
+    func testAppendPeriodArray() {
+        let firstPeriod = TimePeriod(beginning: self.formatter.date(from: "2014 11 05 18:15:12.000")!, end: self.formatter.date(from: "2015 11 05 18:15:12.000")!)
+        let secondPeriod = TimePeriod(beginning: self.formatter.date(from: "2015 11 05 18:15:12.000")!, end: self.formatter.date(from: "2016 11 05 18:15:12.000")!)
+        let thirdPeriod = TimePeriod(beginning: self.formatter.date(from: "2016 11 05 18:15:12.000")!, end: self.formatter.date(from: "2017 11 05 18:15:12.000")!)
+        let fourthPeriod = TimePeriod(beginning: self.formatter.date(from: "2015 4 05 18:15:12.000")!, end: self.formatter.date(from: "2017 4 05 18:15:12.000")!)
+        var periodArray: Array<TimePeriod> = []
+        periodArray.append(firstPeriod)
+        periodArray.append(secondPeriod)
+        periodArray.append(thirdPeriod)
+        periodArray.append(fourthPeriod)
+        let testCollection = TimePeriodCollection()
+        testCollection.append(periodArray)
+        XCTAssertTrue(controlCollection == testCollection)
+    }
+    
+    func testAppendCollection() {
+        let testCollection = TimePeriodCollection()
+        testCollection.append(contentsOf: controlCollection)
+        
+    }
     
     func testRemove() {
         controlCollection.remove(at: 3)
@@ -58,16 +84,27 @@ class TimePeriodCollectionTests : XCTestCase {
     // MARK: - Sorting
     
     func testSort() {
-        XCTAssertFalse(controlCollection[0].beginning! < controlCollection[1].beginning!)
         controlCollection.sort()
-        XCTAssertTrue(controlCollection[0].beginning! < controlCollection[1].beginning!)
+        
+        let testSortedCollection = TimePeriodCollection();
+        testSortedCollection.append(self.controlCollection[0])
+        testSortedCollection.append(self.controlCollection[3])
+        testSortedCollection.append(self.controlCollection[1])
+        testSortedCollection.append(self.controlCollection[2])
+        
+        XCTAssertTrue(controlCollection == testSortedCollection)
     }
     
     func testSorted() {
         let testCollection = controlCollection.sorted()
-        XCTAssertFalse(testCollection[0].beginning == controlCollection[0].beginning)
-        controlCollection.sort()
-        XCTAssertTrue(testCollection[0].beginning == controlCollection[0].beginning)
+        
+        let testSortedCollection = TimePeriodCollection();
+        testSortedCollection.append(self.controlCollection[0])
+        testSortedCollection.append(self.controlCollection[3])
+        testSortedCollection.append(self.controlCollection[1])
+        testSortedCollection.append(self.controlCollection[2])
+        
+        XCTAssertTrue(testCollection == testSortedCollection)
     }
     
     
@@ -81,10 +118,14 @@ class TimePeriodCollectionTests : XCTestCase {
     }
     
     func testPeriodsIntersectedByDate() {
-        let failDate = self.formatter.date(from: "2020 11 05 18:15:12.000")!
-        let successDate = self.formatter.date(from: "2015 10 05 18:15:12.000")!
-        XCTAssertFalse(controlCollection.periodsIntersected(by: failDate).count == 3)
-        XCTAssertTrue(controlCollection.periodsIntersected(by: successDate).count == 3)
+        let successDate = self.formatter.date(from: "2015 11 05 18:15:12.000")!
+        
+        let testCollectionMatch = TimePeriodCollection();
+        testCollectionMatch.append(self.controlCollection[0])
+        testCollectionMatch.append(self.controlCollection[1])
+        testCollectionMatch.append(self.controlCollection[3])
+
+        XCTAssertTrue(testCollectionMatch == controlCollection.periodsIntersected(by: successDate))
     }
     
     func testPeriodsIntersectedByTimePeriod() {
@@ -96,12 +137,20 @@ class TimePeriodCollectionTests : XCTestCase {
     
     func testEquals() {
         let testCollection = controlCollection
-        XCTAssertTrue(testCollection.equals(group: controlCollection))
+        XCTAssertTrue(testCollection.equals(controlCollection))
     }
     
     
-    // MARK: - Map, Filter, Reduce
+    // MARK: - Map
     
+    func testMap() {
+        let saveDuration = controlCollection.duration
+        let testCollection = controlCollection.map { (timePeriod) -> TimePeriodProtocol in
+            timePeriod as! TimePeriod + 2.days
+        }
+        
+        XCTAssertTrue(testCollection.duration == saveDuration! + 2 * 24 * 60 * 60)
+    }
     
     // MARK: - Operator Overloads
     

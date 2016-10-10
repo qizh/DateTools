@@ -9,11 +9,12 @@
 import Foundation
 
 /** 
-    # TimePeriodGroup
- 
-    Time period groups are the final abstraction of date and time in DateTools. Here, time periods are gathered and organized into something useful. There are two main types of time period groups, ```TimePeriodCollection``` and ```TimePeriodChain```.
- 
-    [Visit our github page](https://github.com/MatthewYork/DateTools#time-period-groups) for more information.
+ *  # TimePeriodGroup
+ *  Time period groups are the final abstraction of date and time in DateTools. Here, time 
+ *  periods are gathered and organized into something useful. There are two main types of time
+ *  period groups, `TimePeriodCollection` and `TimePeriodChain`.
+ *
+ *  [Visit our github page](https://github.com/MatthewYork/DateTools#time-period-groups) for more information.
  */
 open class TimePeriodGroup: Sequence {
     
@@ -35,17 +36,17 @@ open class TimePeriodGroup: Sequence {
         return periods.count
     }
     
-    var duration: TimeInterval {
+    var duration: TimeInterval? {
         if beginning != nil && end != nil {
-            return beginning!.timeIntervalSince(end!)
+            return end!.timeIntervalSince(beginning!)
         }
-        return 0
+        return nil
     }
     
     
     // MARK: - Comparisons
     
-    func equals(group: TimePeriodGroup) -> Bool {
+    func equals(_ group: TimePeriodGroup) -> Bool {
         return containSameElements(array1: self.periods, group.periods)
     }
     
@@ -82,7 +83,6 @@ open class TimePeriodGroup: Sequence {
         }
     }
     
-    
     internal func containSameElements(array1: [TimePeriodProtocol], _ array2: [TimePeriodProtocol]) -> Bool {
         guard array1.count == array2.count else {
             return false // No need to sorting if they already have different counts
@@ -91,7 +91,7 @@ open class TimePeriodGroup: Sequence {
         var compArray1: [TimePeriodProtocol] = array1.sorted {$0.beginning! < $1.beginning!}
         var compArray2: [TimePeriodProtocol] = array2.sorted {$0.beginning! < $1.beginning!}
         for x in 0..<compArray1.count {
-            if !compArray1[x].equals(period: compArray2[x]) {
+            if !compArray1[x].equals(compArray2[x]) {
                 return false
             }
         }

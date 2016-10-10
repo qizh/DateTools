@@ -16,6 +16,7 @@ class TimePeriodTests : XCTestCase {
     
     override func setUp() {
         self.formatter.dateFormat = "yyyy MM dd HH:mm:ss.SSS"
+        self.formatter.timeZone = TimeZone(abbreviation: "UTC")
         self.controlTimePeriod.beginning = self.formatter.date(from: "2014 11 05 18:15:12.000")
         self.controlTimePeriod.end = self.formatter.date(from: "2016 11 05 18:15:12.000")
     }
@@ -30,7 +31,7 @@ class TimePeriodTests : XCTestCase {
     func testInits() {
         //Basic init
         let testPeriodInit = TimePeriod(beginning: (self.controlTimePeriod.beginning)!, end: self.controlTimePeriod.end!)
-        XCTAssertTrue(self.controlTimePeriod.equals(period: testPeriodInit) && self.controlTimePeriod.end!.equals(testPeriodInit.end!))
+        XCTAssertTrue(self.controlTimePeriod.equals(testPeriodInit) && self.controlTimePeriod.end!.equals(testPeriodInit.end!))
     }
     
     // **Add more init tests**
@@ -43,16 +44,33 @@ class TimePeriodTests : XCTestCase {
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
-    func testPlusOperator() {
-        let testPeriod = TimePeriod(beginning: self.controlTimePeriod.beginning!, end: self.controlTimePeriod.end!)
-        XCTAssertTrue((testPeriod + 1.days).duration > self.controlTimePeriod.duration)
+    func testAdditionOperator() {
+        let testPeriod = TimePeriod(beginning: self.controlTimePeriod.beginning!, end: self.controlTimePeriod.end!) + 86400
+        let endDate = self.formatter.date(from: "2016 11 06 18:15:12.000")
+        
+        XCTAssertTrue(controlTimePeriod.beginning! == self.controlTimePeriod.beginning! && endDate == testPeriod.end!)
     }
     
-    func testMinusOperator() {
-        let testPeriod = TimePeriod(beginning: self.controlTimePeriod.beginning!, end: self.controlTimePeriod.end!)
-        XCTAssertTrue((testPeriod + 1.days).duration < self.controlTimePeriod.duration)
+    func testAdditionOperatorChunk() {
+        let testPeriod = controlTimePeriod + 1.days
+        let endDate = self.formatter.date(from: "2016 11 06 19:15:12.000") //Includes DST change
+  
+        XCTAssertTrue(controlTimePeriod.beginning! == self.controlTimePeriod.beginning! && endDate == testPeriod.end!)
     }
     
+    func testSubtractionOperator() {
+        let testPeriod = controlTimePeriod - 86400
+        let endDate = self.formatter.date(from: "2016 11 04 18:15:12.000")
+        
+        XCTAssertTrue(controlTimePeriod.beginning! == self.controlTimePeriod.beginning! && endDate == testPeriod.end!)
+    }
+    
+    func testSubtractionOperatorChunk() {
+        let testPeriod = controlTimePeriod - 1.days
+        let endDate = self.formatter.date(from: "2016 11 04 18:15:12.000")
+        
+        XCTAssertTrue(controlTimePeriod.beginning! == self.controlTimePeriod.beginning! && endDate == testPeriod.end!)
+    }
     
     // MARK: - Time Period Information
     
@@ -96,16 +114,16 @@ class TimePeriodTests : XCTestCase {
     
     func testEquals() {
         //Same
-        XCTAssertTrue(self.controlTimePeriod.equals(period: self.controlTimePeriod))
+        XCTAssertTrue(self.controlTimePeriod.equals(self.controlTimePeriod))
         //Different ending
         let differentEndPeriod = TimePeriod(beginning: self.controlTimePeriod.beginning!, end: self.controlTimePeriod.end!.add(1.years))
-        XCTAssertFalse(self.controlTimePeriod.equals(period: differentEndPeriod))
+        XCTAssertFalse(self.controlTimePeriod.equals(differentEndPeriod))
         //Different beginning
         let differentStartPeriod = TimePeriod (beginning: self.controlTimePeriod.beginning!.subtract(1.years), end: self.controlTimePeriod.end!)
-        XCTAssertFalse(self.controlTimePeriod.equals(period: differentStartPeriod))
+        XCTAssertFalse(self.controlTimePeriod.equals(differentStartPeriod))
         //Both endings different
         let differentStartAndEndPeriod = TimePeriod(beginning: self.controlTimePeriod.beginning!.subtract(1.weeks), end: self.controlTimePeriod.end!.subtract(1.weeks))
-        XCTAssertFalse(self.controlTimePeriod.equals(period: differentStartAndEndPeriod))
+        XCTAssertFalse(self.controlTimePeriod.equals(differentStartAndEndPeriod))
     }
     
     func testInside() {
@@ -113,70 +131,70 @@ class TimePeriodTests : XCTestCase {
         //Test exact match
         //Test exact match
         let testTimePeriodExact = TimePeriod(beginning: self.formatter.date(from: "2014 11 05 18:15:12.000")!, end: self.formatter.date(from: "2016 11 05 18:15:12.000")!)
-        XCTAssertTrue(testTimePeriodExact.inside(of: self.controlTimePeriod))
+        XCTAssertTrue(testTimePeriodExact.isInside(of: self.controlTimePeriod))
         //Test same start
         let testTimePeriodSameStart = TimePeriod(beginning: self.formatter.date(from: "2014 11 05 18:15:12.000")!, end: self.formatter.date(from: "2015 11 05 18:15:12.000")!)
-        XCTAssertTrue(testTimePeriodSameStart.inside(of: self.controlTimePeriod))
+        XCTAssertTrue(testTimePeriodSameStart.isInside(of: self.controlTimePeriod))
         //Test same end
         let testTimePeriodSameEnd = TimePeriod(beginning: self.formatter.date(from: "2015 12 05 18:15:12.000")!, end: self.formatter.date(from: "2016 11 05 18:15:12.000")!)
-        XCTAssertTrue(testTimePeriodSameEnd.inside(of: self.controlTimePeriod))
+        XCTAssertTrue(testTimePeriodSameEnd.isInside(of: self.controlTimePeriod))
         //Test completely inside
         let testTimePeriodCompletelyInside = TimePeriod(beginning: self.formatter.date(from: "2015 12 05 18:15:12.000")!, end: self.formatter.date(from: "2016 04 05 18:15:12.000")!)
-        XCTAssertTrue(testTimePeriodCompletelyInside.inside(of: self.controlTimePeriod))
+        XCTAssertTrue(testTimePeriodCompletelyInside.isInside(of: self.controlTimePeriod))
         //NEGATIVE MATCHES
         //Test before
         let testTimePeriodBefore = TimePeriod(beginning: self.formatter.date(from: "2014 11 02 18:15:12.000")!, end: self.formatter.date(from: "2014 11 04 18:15:12.000")!)
-        XCTAssertFalse(testTimePeriodBefore.inside(of: self.controlTimePeriod))
+        XCTAssertFalse(testTimePeriodBefore.isInside(of: self.controlTimePeriod))
         //Test end same as start
         let testTimePeriodEndSameStart = TimePeriod(beginning: self.formatter.date(from: "2013 11 05 18:15:12.000")!, end: self.formatter.date(from: "2014 11 05 18:15:12.000")!)
-        XCTAssertFalse(testTimePeriodEndSameStart.inside(of: self.controlTimePeriod))
+        XCTAssertFalse(testTimePeriodEndSameStart.isInside(of: self.controlTimePeriod))
         //Test end inside
         let testTimePeriodEndInside = TimePeriod(beginning: self.formatter.date(from: "2014 11 02 18:15:12.000")!, end: self.formatter.date(from: "2014 11 07 18:15:12.000")!)
-        XCTAssertFalse(testTimePeriodEndInside.inside(of: self.controlTimePeriod))
+        XCTAssertFalse(testTimePeriodEndInside.isInside(of: self.controlTimePeriod))
         //Test start inside
         let testTimePeriodStartInside = TimePeriod(beginning: self.formatter.date(from: "2014 11 07 18:15:12.000")!, end: self.formatter.date(from: "2016 12 05 18:15:12.000")!)
-        XCTAssertFalse(testTimePeriodStartInside.inside(of: self.controlTimePeriod))
+        XCTAssertFalse(testTimePeriodStartInside.isInside(of: self.controlTimePeriod))
         //Test start same as end
         let testTimePeriodStartSameEnd = TimePeriod(beginning: self.formatter.date(from: "2016 11 05 18:15:12.000")!, end: self.formatter.date(from: "2016 11 10 18:15:12.000")!)
-        XCTAssertFalse(testTimePeriodStartSameEnd.inside(of: self.controlTimePeriod))
+        XCTAssertFalse(testTimePeriodStartSameEnd.isInside(of: self.controlTimePeriod))
         //Test after
         let testTimePeriodAfter = TimePeriod(beginning: self.formatter.date(from: "2016 12 05 18:15:12.000")!, end: self.formatter.date(from: "2016 12 10 18:15:12.000")!)
-        XCTAssertFalse(testTimePeriodAfter.inside(of: self.controlTimePeriod))
+        XCTAssertFalse(testTimePeriodAfter.isInside(of: self.controlTimePeriod))
     }
     
     func testContainsInterval() {
         //POSITIVE MATCHES
         //Test exact match
         let testTimePeriodExact = TimePeriod(beginning: self.formatter.date(from: "2014 11 05 18:15:12.000")!, end: self.formatter.date(from: "2016 11 05 18:15:12.000")!)
-        XCTAssertTrue(self.controlTimePeriod.contains(period: testTimePeriodExact))
+        XCTAssertTrue(self.controlTimePeriod.contains(testTimePeriodExact))
         //Test same start
         let testTimePeriodSameStart = TimePeriod(beginning: self.formatter.date(from: "2014 11 05 18:15:12.000")!, end: self.formatter.date(from: "2015 11 05 18:15:12.000")!)
-        XCTAssertTrue(self.controlTimePeriod.contains(period: testTimePeriodSameStart))
+        XCTAssertTrue(self.controlTimePeriod.contains(testTimePeriodSameStart))
         //Test same end
         let testTimePeriodSameEnd = TimePeriod(beginning: self.formatter.date(from: "2015 12 05 18:15:12.000")!, end: self.formatter.date(from: "2016 11 05 18:15:12.000")!)
-        XCTAssertTrue(self.controlTimePeriod.contains(period: testTimePeriodSameEnd))
+        XCTAssertTrue(self.controlTimePeriod.contains(testTimePeriodSameEnd))
         //Test completely inside
         let testTimePeriodCompletelyInside = TimePeriod(beginning: self.formatter.date(from: "2015 12 05 18:15:12.000")!, end: self.formatter.date(from: "2016 04 05 18:15:12.000")!)
-        XCTAssertTrue(self.controlTimePeriod.contains(period: testTimePeriodCompletelyInside))
+        XCTAssertTrue(self.controlTimePeriod.contains(testTimePeriodCompletelyInside))
         //NEGATIVE MATCHES
         //Test before
         let testTimePeriodBefore = TimePeriod(beginning: self.formatter.date(from: "2014 11 02 18:15:12.000")!, end: self.formatter.date(from: "2014 11 04 18:15:12.000")!)
-        XCTAssertFalse(self.controlTimePeriod.contains(period: testTimePeriodBefore))
+        XCTAssertFalse(self.controlTimePeriod.contains(testTimePeriodBefore))
         //Test end same as start
         let testTimePeriodEndSameStart = TimePeriod(beginning: self.formatter.date(from: "2013 11 05 18:15:12.000")!, end: self.formatter.date(from: "2014 11 05 18:15:12.000")!)
-        XCTAssertFalse(self.controlTimePeriod.contains(period: testTimePeriodEndSameStart))
+        XCTAssertFalse(self.controlTimePeriod.contains(testTimePeriodEndSameStart))
         //Test end inside
         let testTimePeriodEndInside = TimePeriod(beginning: self.formatter.date(from: "2014 11 02 18:15:12.000")!, end: self.formatter.date(from: "2014 11 07 18:15:12.000")!)
-        XCTAssertFalse(self.controlTimePeriod.contains(period: testTimePeriodEndInside))
+        XCTAssertFalse(self.controlTimePeriod.contains(testTimePeriodEndInside))
         //Test start inside
         let testTimePeriodStartInside = TimePeriod(beginning: self.formatter.date(from: "2014 11 07 18:15:12.000")!, end: self.formatter.date(from: "2016 12 05 18:15:12.000")!)
-        XCTAssertFalse(self.controlTimePeriod.contains(period: testTimePeriodStartInside))
+        XCTAssertFalse(self.controlTimePeriod.contains(testTimePeriodStartInside))
         //Test start same as end
         let testTimePeriodStartSameEnd = TimePeriod(beginning: self.formatter.date(from: "2016 11 05 18:15:12.000")!, end: self.formatter.date(from: "2016 11 10 18:15:12.000")!)
-        XCTAssertFalse(self.controlTimePeriod.contains(period: testTimePeriodStartSameEnd))
+        XCTAssertFalse(self.controlTimePeriod.contains(testTimePeriodStartSameEnd))
         //Test after
         let testTimePeriodAfter = TimePeriod(beginning: self.formatter.date(from: "2016 12 05 18:15:12.000")!, end: self.formatter.date(from: "2016 12 10 18:15:12.000")!)
-        XCTAssertFalse(self.controlTimePeriod.contains(period: testTimePeriodAfter))
+        XCTAssertFalse(self.controlTimePeriod.contains(testTimePeriodAfter))
     }
     
     func testOverlaps() {
@@ -291,16 +309,16 @@ class TimePeriodTests : XCTestCase {
         let testPeriodNoGap = TimePeriod(beginning: self.controlTimePeriod.beginning! - 1.days, end: self.controlTimePeriod.end!.subtract(1.days))
         XCTAssertFalse(self.controlTimePeriod.hasGap(between: testPeriodNoGap))
         //Gap receiver early
-        let testPeriodReceiverEarly = TimePeriod(beginning: self.controlTimePeriod.end!.add(1.years), duration: 1.weeks)
+        let testPeriodReceiverEarly = TimePeriod(beginning: self.controlTimePeriod.end!.add(1.years), chunk: 1.weeks)
         XCTAssertTrue(self.controlTimePeriod.hasGap(between: testPeriodReceiverEarly))
         //Gap parameter early
-        let testPeriodParameterEarly = TimePeriod(end: self.controlTimePeriod.beginning! - 1.years, duration: 1.weeks)
+        let testPeriodParameterEarly = TimePeriod(end: self.controlTimePeriod.beginning! - 1.years, chunk: 1.weeks)
         XCTAssertTrue(self.controlTimePeriod.hasGap(between: testPeriodParameterEarly))
     }
     
     func testGap() {
         //Gap of 1 minute
-        let testPeriodParameter1MinuteEarly = TimePeriod(end: self.controlTimePeriod.beginning! - 1.minutes, duration: 1.seconds)
+        let testPeriodParameter1MinuteEarly = TimePeriod(end: self.controlTimePeriod.beginning! - 1.minutes, chunk: 1.seconds)
         XCTAssertEqual(60, self.controlTimePeriod.gap(between: testPeriodParameter1MinuteEarly))
     }
     
@@ -312,20 +330,20 @@ class TimePeriodTests : XCTestCase {
         let testDateBetween = self.formatter.date(from: "2015 11 05 18:15:12.000")!
         let testDateAfter = self.formatter.date(from: "2016 12 05 18:15:12.000")!
         // Test before
-        XCTAssertFalse(self.controlTimePeriod.contains(date: testDateBefore, interval: Interval.open))
-        XCTAssertFalse(self.controlTimePeriod.contains(date: testDateBefore, interval: Interval.closed))
+        XCTAssertFalse(self.controlTimePeriod.contains(testDateBefore, interval: Interval.open))
+        XCTAssertFalse(self.controlTimePeriod.contains(testDateBefore, interval: Interval.closed))
         // Test on start date
-        XCTAssertFalse(self.controlTimePeriod.contains(date: self.controlTimePeriod.beginning!, interval: Interval.open))
-        XCTAssertTrue(self.controlTimePeriod.contains(date: self.controlTimePeriod.beginning!, interval: Interval.closed))
+        XCTAssertFalse(self.controlTimePeriod.contains(self.controlTimePeriod.beginning!, interval: Interval.open))
+        XCTAssertTrue(self.controlTimePeriod.contains(self.controlTimePeriod.beginning!, interval: Interval.closed))
         // Test in middle
-        XCTAssertTrue(self.controlTimePeriod.contains(date: testDateBetween, interval: Interval.closed))
-        XCTAssertTrue(self.controlTimePeriod.contains(date: testDateBetween, interval: Interval.closed))
+        XCTAssertTrue(self.controlTimePeriod.contains(testDateBetween, interval: Interval.closed))
+        XCTAssertTrue(self.controlTimePeriod.contains(testDateBetween, interval: Interval.closed))
         // Test on end date
-        XCTAssertFalse(self.controlTimePeriod.contains(date: self.controlTimePeriod.end!, interval: Interval.open))
-        XCTAssertTrue(self.controlTimePeriod.contains(date: self.controlTimePeriod.end!, interval: Interval.closed))
+        XCTAssertFalse(self.controlTimePeriod.contains(self.controlTimePeriod.end!, interval: Interval.open))
+        XCTAssertTrue(self.controlTimePeriod.contains(self.controlTimePeriod.end!, interval: Interval.closed))
         // Test after
-        XCTAssertFalse(self.controlTimePeriod.contains(date: testDateAfter, interval: Interval.open))
-        XCTAssertFalse(self.controlTimePeriod.contains(date: testDateAfter, interval: Interval.closed))
+        XCTAssertFalse(self.controlTimePeriod.contains(testDateAfter, interval: Interval.open))
+        XCTAssertFalse(self.controlTimePeriod.contains(testDateAfter, interval: Interval.closed))
     }
     
     
@@ -337,7 +355,7 @@ class TimePeriodTests : XCTestCase {
         let endEarlierSecond = self.formatter.date(from: "2016 11 05 18:15:11.000")!
         //Second time period
         let testPeriod = TimePeriod(beginning: startEarlierSecond, end: endEarlierSecond)
-        self.controlTimePeriod.shift(by: 1)
+        self.controlTimePeriod.shift(by: -1)
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
@@ -382,10 +400,10 @@ class TimePeriodTests : XCTestCase {
     }
     
     func testShiftYearEarlierInterval() {
-        let startEarlier = self.formatter.date(from: "2013 11 05 18:15:12.000")!
+        let startEarlier = self.formatter.date(from: "2013 11 04 18:15:12.000")!
         let endEarlier = self.formatter.date(from: "2015 11 05 18:15:12.000")!
         let testPeriod = TimePeriod(beginning: startEarlier, end: endEarlier)
-        self.controlTimePeriod.shift(by: -Constants.SecondsInYear)
+        self.controlTimePeriod.shift(by: -Constants.SecondsInLeapYear) // note: a leap year is subtracted from both beginning and end
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
@@ -425,7 +443,7 @@ class TimePeriodTests : XCTestCase {
     }
     
     func testShiftWeekEarlierChunk() {
-        let startEarlier = self.formatter.date(from: "2014 10 29 18:15:12.000")!
+        let startEarlier = self.formatter.date(from: "2014 10 29 17:15:12.000")!
         let endEarlier = self.formatter.date(from: "2016 10 29 18:15:12.000")!
         let testPeriod = TimePeriod(beginning: startEarlier, end: endEarlier)
         self.controlTimePeriod.shift(by: -1.weeks)
@@ -433,7 +451,7 @@ class TimePeriodTests : XCTestCase {
     }
     
     func testShiftMonthEarlierChunk() {
-        let startEarlier = self.formatter.date(from: "2014 10 05 18:15:12.000")!
+        let startEarlier = self.formatter.date(from: "2014 10 05 17:15:12.000")!
         let endEarlier = self.formatter.date(from: "2016 10 05 18:15:12.000")!
         let testPeriod = TimePeriod(beginning: startEarlier, end: endEarlier)
         self.controlTimePeriod.shift(by: -1.months)
@@ -442,7 +460,7 @@ class TimePeriodTests : XCTestCase {
     
     func testShiftYearEarlierChunk() {
         let startEarlier = self.formatter.date(from: "2013 11 05 18:15:12.000")!
-        let endEarlier = self.formatter.date(from: "2015 11 05 18:15:12.000")!
+        let endEarlier = self.formatter.date(from: "2015 11 05 19:15:12.000")!
         let testPeriod = TimePeriod(beginning: startEarlier, end: endEarlier)
         self.controlTimePeriod.shift(by: -1.years)
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
@@ -471,7 +489,7 @@ class TimePeriodTests : XCTestCase {
         let startLater = self.formatter.date(from: "2014 11 05 19:15:12.000")!
         let endLater = self.formatter.date(from: "2016 11 05 19:15:12.000")!
         let testPeriod = TimePeriod(beginning: startLater, end: endLater)
-        self.controlTimePeriod.shift(by: 1.hours)
+        self.controlTimePeriod.shift(by: Constants.SecondsInHour)
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
@@ -479,7 +497,7 @@ class TimePeriodTests : XCTestCase {
         let startLater = self.formatter.date(from: "2014 11 06 18:15:12.000")!
         let endLater = self.formatter.date(from: "2016 11 06 18:15:12.000")!
         let testPeriod = TimePeriod(beginning: startLater, end: endLater)
-        self.controlTimePeriod.shift(by: 1.days)
+        self.controlTimePeriod.shift(by: Constants.SecondsInDay) //Will not take into account daylight savings
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
@@ -487,7 +505,7 @@ class TimePeriodTests : XCTestCase {
         let startLater = self.formatter.date(from: "2014 11 12 18:15:12.000")!
         let endLater = self.formatter.date(from: "2016 11 12 18:15:12.000")!
         let testPeriod = TimePeriod(beginning: startLater, end: endLater)
-        self.controlTimePeriod.shift(by: 1.weeks)
+        self.controlTimePeriod.shift(by: Constants.SecondsInWeek) //Will not take into account daylight savings
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
@@ -495,7 +513,7 @@ class TimePeriodTests : XCTestCase {
         let startLater = self.formatter.date(from: "2014 12 05 18:15:12.000")!
         let endLater = self.formatter.date(from: "2016 12 05 18:15:12.000")!
         let testPeriod = TimePeriod(beginning: startLater, end: endLater)
-        self.controlTimePeriod.shift(by: 1.months)
+        self.controlTimePeriod.shift(by: Constants.SecondsInMonth30) //Will not take into account daylight savings
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
@@ -503,7 +521,7 @@ class TimePeriodTests : XCTestCase {
         let startLater = self.formatter.date(from: "2015 11 05 18:15:12.000")!
         let endLater = self.formatter.date(from: "2017 11 05 18:15:12.000")!
         let testPeriod = TimePeriod(beginning: startLater, end: endLater)
-        self.controlTimePeriod.shift(by: 1.years)
+        self.controlTimePeriod.shift(by: Constants.SecondsInYear) //Will not take into account daylight savings or leap year
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
@@ -536,7 +554,7 @@ class TimePeriodTests : XCTestCase {
     
     func testShiftDayLaterChunk() {
         let startLater = self.formatter.date(from: "2014 11 06 18:15:12.000")!
-        let endLater = self.formatter.date(from: "2016 11 06 18:15:12.000")!
+        let endLater = self.formatter.date(from: "2016 11 06 19:15:12.000")!
         let testPeriod = TimePeriod(beginning: startLater, end: endLater)
         self.controlTimePeriod.shift(by: 1.days)
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
@@ -544,7 +562,7 @@ class TimePeriodTests : XCTestCase {
     
     func testShiftWeekLaterChunk() {
         let startLater = self.formatter.date(from: "2014 11 12 18:15:12.000")!
-        let endLater = self.formatter.date(from: "2016 11 12 18:15:12.000")!
+        let endLater = self.formatter.date(from: "2016 11 12 19:15:12.000")!
         let testPeriod = TimePeriod(beginning: startLater, end: endLater)
         self.controlTimePeriod.shift(by: 1.weeks)
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
@@ -552,7 +570,7 @@ class TimePeriodTests : XCTestCase {
     
     func testShiftMonthLaterChunk() {
         let startLater = self.formatter.date(from: "2014 12 05 18:15:12.000")!
-        let endLater = self.formatter.date(from: "2016 12 05 18:15:12.000")!
+        let endLater = self.formatter.date(from: "2016 12 05 19:15:12.000")!
         let testPeriod = TimePeriod(beginning: startLater, end: endLater)
         self.controlTimePeriod.shift(by: 1.months)
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
@@ -560,7 +578,7 @@ class TimePeriodTests : XCTestCase {
     
     func testShiftYearLaterChunk() {
         let startLater = self.formatter.date(from: "2015 11 05 18:15:12.000")!
-        let endLater = self.formatter.date(from: "2017 11 05 18:15:12.000")!
+        let endLater = self.formatter.date(from: "2017 11 05 19:15:12.000")!
         let testPeriod = TimePeriod(beginning: startLater, end: endLater)
         self.controlTimePeriod.shift(by: 1.years)
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
@@ -630,15 +648,6 @@ class TimePeriodTests : XCTestCase {
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
-    func testLengthenAnchorCenterChunk() {
-        //Test dates
-        let lengthenedStart = self.formatter.date(from: "2014 11 05 18:15:11.000")!
-        let lengthenedEnd = self.formatter.date(from: "2016 11 05 18:15:13.000")!
-        let testPeriod = TimePeriod(beginning: lengthenedStart, end: lengthenedEnd)
-        self.controlTimePeriod.lengthen(by: 2.seconds, at: Anchor.center)
-        XCTAssertTrue(testPeriod == self.controlTimePeriod)
-    }
-    
     func testLengthenAnchorEndChunk() {
         //Test dates
         let lengthenedStart = self.formatter.date(from: "2014 11 05 18:15:10.000")!
@@ -652,15 +661,6 @@ class TimePeriodTests : XCTestCase {
         let shortenedEnd = self.formatter.date(from: "2016 11 05 18:15:10.000")!
         let testPeriod = TimePeriod(beginning: self.controlTimePeriod.beginning!, end: shortenedEnd)
         self.controlTimePeriod.shorten(by: 2.seconds, at: Anchor.beginning)
-        XCTAssertTrue(testPeriod == self.controlTimePeriod)
-    }
-    
-    func testShortenAnchorCenterChunk() {
-        //Test dates
-        let shortenedStart = self.formatter.date(from: "2014 11 05 18:15:13.000")!
-        let shortenedEnd = self.formatter.date(from: "2016 11 05 18:15:11.000")!
-        let testPeriod = TimePeriod(beginning: shortenedStart, end: shortenedEnd)
-        self.controlTimePeriod.shorten(by: 2.seconds, at: Anchor.center)
         XCTAssertTrue(testPeriod == self.controlTimePeriod)
     }
     
