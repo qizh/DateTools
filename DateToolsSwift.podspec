@@ -18,6 +18,6 @@ Pod::Spec.new do |s|
   s.watchos.deployment_target = '2.0'
   s.requires_arc = true
 
-  s.source_files = 'DateToolsSwift/DateTools'
-  s.resources    = 'DateToolsSwift/DateTools/DateTools.bundle'
+  s.source_files = 'Sources/DateToolsSwift/DateTools'
+  s.resources    = 'Sources/DateToolsSwift/DateTools/DateTools.bundle'
 end

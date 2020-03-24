@@ -1,0 +1,15 @@
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Constants.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Bundle.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Comparators.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Components.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Format.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Inits.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Manipulations.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+TimeAgo.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Enums.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Integer+DateTools.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimeChunk.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimePeriod.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimePeriodChain.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimePeriodCollection.swift
+/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimePeriodGroup.swift
