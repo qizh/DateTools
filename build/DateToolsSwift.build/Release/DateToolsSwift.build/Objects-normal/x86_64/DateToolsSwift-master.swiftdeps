@@ -1,0 +1,19 @@
+version: "Apple Swift version 5.1.3 (swiftlang-1100.0.282.1 clang-1100.0.33.15)"
+options: "7319b7e2ce9081042951e266e8fc78d0"
+build_time: [1585073839, 914578000]
+inputs:
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Constants.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Bundle.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Comparators.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Components.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Format.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Inits.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+Manipulations.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Date+TimeAgo.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Enums.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/Integer+DateTools.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimeChunk.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimePeriod.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimePeriodChain.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimePeriodCollection.swift": [9223372036, 854775807]
+  "/Users/brent/Repos/iOS/DateTools/Sources/DateToolsSwift/DateTools/TimePeriodGroup.swift": [9223372036, 854775807]
