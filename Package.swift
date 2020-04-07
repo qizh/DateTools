@@ -8,8 +8,14 @@ let package = Package(
 	],
 	dependencies: [],
 	targets:[
-		.target(name: "DateToolsSwift", path: "Sources", exclude: ["Examples"]),
-		.testTarget(name: "DateToolsSwiftTests", dependencies: ["DateToolsSwift"])
-		//Need to figure out how to get the objc dependencies in here
+		.target(
+			name: "DateToolsSwift", 
+			path: "Sources/DateToolsSwift", 
+			exclude: ["Examples"]
+		),
+		.testTarget(
+			name: "DateToolsSwiftTests", 
+			dependencies: ["DateToolsSwift"]
+		)
 	]
 )
