@@ -2,9 +2,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "DateToolsSwift",
+	name: "DateToolsSwift",
 	products: [
-		.library(name: "DateToolsSwift", targets: ["DateToolsSwift"]),
+		.library(name: "DateToolsSwift", 			targets: ["DateToolsSwift"]),
+		.library(name: "DateToolsSwiftDynamic", type: .dynamic, targets: ["DateToolsSwift"]),
+		.library(name: "DateToolsSwiftStatic", 	type: .static, 	targets: ["DateToolsSwift"]),
 	],
 	dependencies: [],
 	targets:[
